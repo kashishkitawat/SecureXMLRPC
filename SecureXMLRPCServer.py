@@ -1,11 +1,12 @@
 """
 This project is not written by me. I have searched on the internet and compiled
 my version of the SecureXMLRPCServer
+I have not provided my certificatesself.
+You can create your own certificate and keyfile using openssl
 """
 
-import SocketServer
-import BaseHTTPServer
-import SimpleXMLRPCServer
+import socketserver
+from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCDispatcher, SimpleXMLRPCRequestHandler
 
 import socket
 import ssl
@@ -14,9 +15,9 @@ KEYFILE = 'serverkey.pem'  # This is the private key file
 CERTFILE = 'servercert.pem'  # This is the certificate file
 
 
-class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,
-                         SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
-    def __init__(self, server_address, HandlerClass, logRequests=True):
+class SecureXMLRPCServer(SimpleXMLRPCServer, SimpleXMLRPCDispatcher):
+    def __init__(self, server_address, HandlerClass, logRequests=True,
+                 allow_none=False, encoding=None, bind_and_activate=True):
         """Secure XML-RPC server.
 
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for
@@ -24,23 +25,20 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,
         """
         self.logRequests = logRequests
 
-        try:
-            SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
-        except TypeError:
-            SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(
-                                                            self, False, None)
-        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
-        self.socket = ssl.wrap_socket(socket.socket(), server_side=True,
-                                      certfile=CERTFILE, keyfile=KEYFILE,
-                                      cert_reqs=ssl.CERT_REQUIRED,
-                                      ssl_version=ssl.PROTOCOL_TLS)
+        SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, False, None)
+        socketserver.BaseServer.__init__(self, server_address, HandlerClass)
+        self.socket = ssl.wrap_socket(
+                        socket.socket(self.address_family, self.socket_type),
+                        server_side=True,
+                        certfile=CERTFILE, keyfile=KEYFILE,
+                        ssl_version=ssl.PROTOCOL_SSLv23)
 
-        self.server_bind()
-        self.server_activate()
+        if bind_and_activate:
+            self.server_bind()
+            self.server_activate()
 
 
-class SecureXMLRpcRequestHandler(
-                                SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class SecureXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
     """Secure XML-RPC request handler class.
 
     It it very similar to SimpleXMLRPCRequestHandler but it uses HTTPS for
@@ -48,8 +46,8 @@ class SecureXMLRpcRequestHandler(
     """
     def setup(self):
         self.connection = self.request
-        self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
-        self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
+        self.rfile = self.connection.makefile("rb", self.rbufsize)
+        self.wfile = self.connection.makefile("wb", self.wbufsize)
 
     def do_POST(self):
         """Handles the HTTPS POST request.

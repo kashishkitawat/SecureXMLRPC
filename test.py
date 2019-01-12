@@ -4,19 +4,21 @@ LISTEN_HOST = 'localhost'
 LISTEN_PORT = 5443
 
 
-def test(HandlerClass=SecureXMLRPCServer.SecureXMLRpcRequestHandler,
+class xmlrpc_registers:
+
+    def add(self, x, y):
+        return x + y
+
+    def mult(self, x, y):
+        return x*y
+
+    def div(self, x, y):
+        return x//y
+
+
+def test(HandlerClass=SecureXMLRPCServer.SecureXMLRPCRequestHandler,
          ServerClass=SecureXMLRPCServer.SecureXMLRPCServer):
     """Test xml rpc over https server"""
-    class xmlrpc_registers:
-        def add(self, x, y):
-            return x + y
-
-        def mult(self, x, y):
-            return x*y
-
-        def div(self, x, y):
-            return x//y
-
     server_address = (LISTEN_HOST, LISTEN_PORT)
     server = ServerClass(server_address, HandlerClass)
     server.register_instance(xmlrpc_registers())
