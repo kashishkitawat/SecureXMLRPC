@@ -6,33 +6,28 @@ You can create your own certificate and keyfile using openssl
 """
 
 import socketserver
-from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCDispatcher
+from xmlrpc.server import SimpleXMLRPCServer
 
 import socket
 import ssl
 
-KEYFILE = 'serverkey.pem'  # This is the private key file
-CERTFILE = 'servercert.pem'  # This is the certificate file
-
-
-class SecureXMLRPCServer(SimpleXMLRPCServer, SimpleXMLRPCDispatcher):
-    def __init__(self, server_address, HandlerClass, logRequests=True,
-                 allow_none=False, encoding=None, bind_and_activate=True):
+class SecureXMLRPCServer(SimpleXMLRPCServer):
+    def __init__(self, server_address, HandlerClass, keyfile, certfile,
+                 ssl_version=ssl.PROTOCOL_SSLv23, *args, **kwargs):
         """Secure XML-RPC server.
 
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for
         transporting XML data.
         """
-        self.logRequests = logRequests
+        super().__init__(server_address, HandlerClass, *args, **kwargs)
+        self.keyfile     = keyfile
+        self.certfile    = certfile
+        self.ssl_version = ssl_version
 
-        SimpleXMLRPCDispatcher.__init__(self, False, None)
-        socketserver.BaseServer.__init__(self, server_address, HandlerClass)
-        self.socket = ssl.wrap_socket(
-                        socket.socket(self.address_family, self.socket_type),
-                        server_side=True,
-                        certfile=CERTFILE, keyfile=KEYFILE,
-                        ssl_version=ssl.PROTOCOL_SSLv23)
-
-        if bind_and_activate:
-            self.server_bind()
-            self.server_activate()
+    def get_request(self):
+        """Get the request and client address from the socket."""
+        sock, addr  = super().get_request()
+        sock = ssl.wrap_socket(sock, server_side=True,
+                        certfile=self.certfile, keyfile=self.keyfile,
+                        ssl_version=self.ssl_version)
+        return sock, addr

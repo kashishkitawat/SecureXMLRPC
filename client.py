@@ -8,7 +8,7 @@ import ssl
 certFile = 'servercert.pem'  # Add your own certificate file
 context = ssl.SSLContext()  # Arguments can contain SSL PROTOCOL version
 context.verify_mode = ssl.CERT_REQUIRED  # Expects cert from other side
-context.check_hostname = True  # If you are using localhost for testing then change this to false
+context.check_hostname = False
 context.load_verify_locations(certFile)
 
 server = client.ServerProxy("https://localhost:5443", context=context)

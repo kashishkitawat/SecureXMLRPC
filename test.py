@@ -21,7 +21,8 @@ def test(HandlerClass=SimpleXMLRPCRequestHandler,
          ServerClass=SecureXMLRPCServer.SecureXMLRPCServer):
     """Test xml rpc over https server"""
     server_address = (LISTEN_HOST, LISTEN_PORT)
-    server = ServerClass(server_address, HandlerClass)
+    server = ServerClass(server_address, HandlerClass,
+                         certfile='servercert.pem', keyfile='serverkey.pem')
     server.register_instance(xmlrpc_registers())
     sa = server.socket.getsockname()
     print("Serving HTTPS on", sa[0], "port", sa[1])
