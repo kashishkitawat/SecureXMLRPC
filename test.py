@@ -1,4 +1,5 @@
 import SecureXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 LISTEN_HOST = 'localhost'
 LISTEN_PORT = 5443
@@ -16,7 +17,7 @@ class xmlrpc_registers:
         return x//y
 
 
-def test(HandlerClass=SecureXMLRPCServer.SecureXMLRPCRequestHandler,
+def test(HandlerClass=SimpleXMLRPCRequestHandler,
          ServerClass=SecureXMLRPCServer.SecureXMLRPCServer):
     """Test xml rpc over https server"""
     server_address = (LISTEN_HOST, LISTEN_PORT)
