@@ -11,7 +11,8 @@ keyFile = 'clientkey.pem'
 context = ssl.SSLContext()  # Arguments can contain SSL PROTOCOL version
 context.verify_mode = ssl.CERT_REQUIRED  # Expects cert from other side
 context.check_hostname = False
-context.load_verify_locations(certFile)
+context.load_verify_locations(ca_certFile)
+context.load_cert_chain(certfile=certFile, keyfile=keyFile)
 
 server = client.ServerProxy("https://localhost:5443", context=context)
 try:

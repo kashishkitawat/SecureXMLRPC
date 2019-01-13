@@ -5,11 +5,10 @@ I have not provided my certificatesself.
 You can create your own certificate and keyfile using openssl
 """
 
-import socketserver
 from xmlrpc.server import SimpleXMLRPCServer
-
-import socket
 import ssl
+
+ca_certFile = 'clientcert.pem'
 
 class SecureXMLRPCServer(SimpleXMLRPCServer):
     def __init__(self, server_address, HandlerClass, keyfile, certfile,
@@ -22,14 +21,15 @@ class SecureXMLRPCServer(SimpleXMLRPCServer):
         """
 
         super().__init__(server_address, HandlerClass, *args, **kwargs)
-        self.keyfile     = keyfile
-        self.certfile    = certfile
+        self.keyfile = keyfile
+        self.certfile = certfile
         self.ssl_version = ssl_version
 
     def get_request(self):
         """Get the request and client address from the socket."""
-        sock, addr  = super().get_request()
-        sock = ssl.wrap_socket(sock, server_side=True,
-                        certfile=self.certfile, keyfile=self.keyfile,
-                        ssl_version=self.ssl_version)
+        sock, addr = super().get_request()
+        sock = ssl.wrap_socket(sock, server_side=True, certfile=self.certfile,
+                               keyfile=self.keyfile, ca_certs=ca_certFile,
+                               cert_reqs=ssl.CERT_REQUIRED,
+                               ssl_version=self.ssl_version)
         return sock, addr
