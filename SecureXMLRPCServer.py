@@ -13,6 +13,7 @@ import ssl
 
 KEYFILE = 'serverkey.pem'  # This is the private key file
 CERTFILE = 'servercert.pem'  # This is the certificate file
+ca_certFile = 'clientcert.pem'
 
 
 class SecureXMLRPCServer(SimpleXMLRPCServer, SimpleXMLRPCDispatcher):
@@ -31,6 +32,7 @@ class SecureXMLRPCServer(SimpleXMLRPCServer, SimpleXMLRPCDispatcher):
                         socket.socket(self.address_family, self.socket_type),
                         server_side=True,
                         certfile=CERTFILE, keyfile=KEYFILE,
+                        cert_reqs=ssl.CERT_REQUIRED, ca_certs=ca_certFile,
                         ssl_version=ssl.PROTOCOL_SSLv23)
 
         if bind_and_activate:

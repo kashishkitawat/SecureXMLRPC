@@ -5,11 +5,14 @@ You can create your selfsigned certificates using openssl
 from xmlrpc import client
 import ssl
 
-certFile = 'servercert.pem'  # Add your own certificate file
+ca_certFile = 'servercert.pem'  # Add your own certificate file
+certFile = 'clientcert.pem'
+keyFile = 'clientkey.pem'
 context = ssl.SSLContext()  # Arguments can contain SSL PROTOCOL version
 context.verify_mode = ssl.CERT_REQUIRED  # Expects cert from other side
 context.check_hostname = True  # If you are using localhost for testing then change this to false
-context.load_verify_locations(certFile)
+context.load_verify_locations(ca_certFile)
+context.load_cert_chain(certfile=certFile, keyfile=keyFile)
 
 server = client.ServerProxy("https://localhost:5443", context=context)
 try:
