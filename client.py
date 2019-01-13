@@ -5,7 +5,9 @@ You can create your selfsigned certificates using openssl
 from xmlrpc import client
 import ssl
 
-certFile = 'servercert.pem'  # Add your own certificate file
+ca_certFile = 'servercert.pem'  # Add your own certificate file
+certFile = 'clientcert.pem'
+keyFile = 'clientkey.pem'
 context = ssl.SSLContext()  # Arguments can contain SSL PROTOCOL version
 context.verify_mode = ssl.CERT_REQUIRED  # Expects cert from other side
 context.check_hostname = False

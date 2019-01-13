@@ -14,11 +14,13 @@ import ssl
 class SecureXMLRPCServer(SimpleXMLRPCServer):
     def __init__(self, server_address, HandlerClass, keyfile, certfile,
                  ssl_version=ssl.PROTOCOL_SSLv23, *args, **kwargs):
+
         """Secure XML-RPC server.
 
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for
         transporting XML data.
         """
+
         super().__init__(server_address, HandlerClass, *args, **kwargs)
         self.keyfile     = keyfile
         self.certfile    = certfile
